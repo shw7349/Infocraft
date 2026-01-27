@@ -1,0 +1,36 @@
+# ============================================
+# INFOCRAFT 설정 파일 예제
+# ============================================
+# 이 파일을 app.properties로 복사하여 사용하세요.
+# cp config/app.properties.example config/app.properties
+# ============================================
+
+# --------------------------------------------
+# 사이트 설정
+# --------------------------------------------
+SITE_URL=http://localhost:3000
+SITE_NAME=INFOCRAFT
+
+# --------------------------------------------
+# 데이터베이스 설정
+# --------------------------------------------
+DATABASE_URL=file:./dev.db
+
+# --------------------------------------------
+# NextAuth.js 인증 설정
+# --------------------------------------------
+# 생성 방법: openssl rand -base64 32
+AUTH_SECRET=generate-a-secret-key-here
+
+# --------------------------------------------
+# Google OAuth 설정
+# --------------------------------------------
+# https://console.cloud.google.com/apis/credentials
+AUTH_GOOGLE_ID=your-google-client-id
+AUTH_GOOGLE_SECRET=your-google-client-secret
+
+# --------------------------------------------
+# 선택적 설정
+# --------------------------------------------
+# NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+# NEXT_PUBLIC_ADSENSE_ID=ca-pub-XXXXXXXXXX
