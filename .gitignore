@@ -44,3 +44,7 @@ prisma/dev.db-journal
 .idea/
 .vscode/
 *.iml
+
+# Markdown files (except README.md)
+*.md
+!README.md

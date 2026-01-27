@@ -7,6 +7,7 @@ const menuItems = [
   { name: '대시보드', href: '/admin', icon: '📊' },
   { name: '글 관리', href: '/admin/articles', icon: '📝' },
   { name: '키워드 관리', href: '/admin/keywords', icon: '🔑' },
+  { name: '배치 관리', href: '/admin/batch', icon: '⚙️' },
 ]
 
 export default function Sidebar() {

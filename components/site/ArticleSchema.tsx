@@ -29,10 +29,6 @@ export default function ArticleSchema({
     publisher: {
       '@type': 'Organization',
       name: 'INFOCRAFT',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
-      },
     },
     datePublished: datePublished,
     dateModified: dateModified || datePublished,

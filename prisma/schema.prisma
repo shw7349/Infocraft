@@ -54,12 +54,38 @@ model VerificationToken {
 }
 
 model Keyword {
-  id        String    @id @default(cuid())
-  keyword   String    @unique
-  category  String
-  priority  Int       @default(0)
-  articles  Article[]
-  createdAt DateTime  @default(now())
+  id                  String         @id @default(cuid())
+  keyword             String         @unique
+  category            String
+  priority            Int            @default(0)
+  lastCheckedAt       DateTime?
+  lastGeneratedAt     DateTime?
+  dailyGeneratedCount Int            @default(0)
+  articles            Article[]
+  trends              KeywordTrend[]
+  createdAt           DateTime       @default(now())
+}
+
+model KeywordTrend {
+  id        String   @id @default(cuid())
+  keywordId String
+  keyword   Keyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  period    String
+  ratio     Float
+  hotScore  Float    @default(0)
+  fetchedAt DateTime @default(now())
+
+  @@unique([keywordId, period])
+}
+
+model BatchLog {
+  id          String    @id @default(cuid())
+  jobType     String
+  status      String
+  result      String?
+  error       String?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
 }
 
 model Article {

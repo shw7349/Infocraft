@@ -81,6 +81,25 @@ function generateEnvContent(properties) {
     lines.push('');
   }
 
+  // Naver DataLab
+  if (properties.NAVER_CLIENT_ID || properties.NAVER_CLIENT_SECRET) {
+    lines.push('# Naver DataLab');
+    if (properties.NAVER_CLIENT_ID) {
+      lines.push(`NAVER_CLIENT_ID="${properties.NAVER_CLIENT_ID}"`);
+    }
+    if (properties.NAVER_CLIENT_SECRET) {
+      lines.push(`NAVER_CLIENT_SECRET="${properties.NAVER_CLIENT_SECRET}"`);
+    }
+    lines.push('');
+  }
+
+  // Claude API
+  if (properties.CLAUDE_API_KEY) {
+    lines.push('# Claude API');
+    lines.push(`CLAUDE_API_KEY="${properties.CLAUDE_API_KEY}"`);
+    lines.push('');
+  }
+
   // Optional settings
   const optionalKeys = ['NEXT_PUBLIC_GA_ID', 'NEXT_PUBLIC_ADSENSE_ID'];
   const optionalLines = [];

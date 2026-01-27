@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
-import { serialize } from 'next-mdx-remote/serialize'
-import remarkGfm from 'remark-gfm'
-import rehypeSlug from 'rehype-slug'
 
 interface ArticlePreviewProps {
   content: string
@@ -17,17 +14,21 @@ export default function ArticlePreview({ content }: ArticlePreviewProps) {
   useEffect(() => {
     const compileMDX = async () => {
       try {
-        // Remove frontmatter for preview
-        const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n?/, '')
-
-        const result = await serialize(contentWithoutFrontmatter, {
-          mdxOptions: {
-            remarkPlugins: [remarkGfm],
-            rehypePlugins: [rehypeSlug],
-          },
+        const res = await fetch('/api/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
         })
-        setMdxSource(result)
-        setError(null)
+
+        const data = await res.json()
+
+        if (data.error) {
+          setError(data.error)
+          setMdxSource(null)
+        } else {
+          setMdxSource(data)
+          setError(null)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'MDX 파싱 오류')
         setMdxSource(null)

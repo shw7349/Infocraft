@@ -33,6 +33,7 @@ const statusColors: Record<string, string> = {
   approved: 'bg-blue-200 text-blue-700',
   scheduled: 'bg-purple-200 text-purple-700',
   published: 'bg-green-200 text-green-700',
+  rejected: 'bg-red-200 text-red-700',
 }
 
 const statusLabels: Record<string, string> = {
@@ -41,6 +42,7 @@ const statusLabels: Record<string, string> = {
   approved: '승인',
   scheduled: '예약',
   published: '발행됨',
+  rejected: '반려',
 }
 
 const categoryLabels: Record<string, string> = {
@@ -59,7 +61,7 @@ export default async function ArticlesPage({
   const currentStatus = params.status || 'all'
   const articles = await getArticles(currentStatus === 'all' ? undefined : currentStatus)
 
-  const statuses = ['all', 'draft', 'review', 'approved', 'scheduled', 'published']
+  const statuses = ['all', 'draft', 'review', 'approved', 'scheduled', 'published', 'rejected']
 
   return (
     <div>

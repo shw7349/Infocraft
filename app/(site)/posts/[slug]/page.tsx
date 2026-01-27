@@ -12,7 +12,7 @@ interface Props {
 
 async function getArticle(slug: string) {
   try {
-    const article = await prisma.article.findUnique({
+    const article = await prisma.article.findFirst({
       where: { slug, status: 'published' },
     })
     return article
@@ -72,7 +72,13 @@ export default async function ArticlePage({ params }: Props) {
   const { frontmatter, content: rawContent } = parseFrontmatter(article.content)
   const { content } = await compileMDXContent(article.content)
   const headings = extractHeadings(rawContent)
-  const tags = JSON.parse(article.tags || '[]')
+  let tags: string[] = []
+  try {
+    const parsed = JSON.parse(article.tags || '[]')
+    tags = Array.isArray(parsed) ? parsed : article.tags.split(',').map((t: string) => t.trim())
+  } catch {
+    tags = article.tags ? article.tags.split(',').map((t: string) => t.trim()) : []
+  }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   return (
