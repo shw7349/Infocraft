@@ -34,7 +34,13 @@ export async function compileMDXContent(source: string) {
 
 export function parseFrontmatter(source: string) {
   const { data, content } = matter(source)
-  return { frontmatter: data as ArticleFrontmatter, content }
+  // gray-matter가 Date 객체로 파싱하는 것을 문자열로 변환
+  const frontmatter = {
+    ...data,
+    date: data.date instanceof Date ? data.date.toISOString().split('T')[0] : data.date,
+    updated: data.updated instanceof Date ? data.updated.toISOString().split('T')[0] : data.updated,
+  } as ArticleFrontmatter
+  return { frontmatter, content }
 }
 
 export function extractHeadings(content: string) {

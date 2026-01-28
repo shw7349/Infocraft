@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 const categories = ['finance', 'policy', 'it-tips', 'shopping']
-const staticPages = ['about', 'privacy', 'terms', 'contact']
+const staticPages = ['about', 'privacy', 'terms'] // 'contact' 임시 제외
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = []

@@ -18,7 +18,7 @@ import { parseBatchFrontmatter } from '../lib/parse-frontmatter'
 
 const prisma = new PrismaClient()
 
-const MAX_DAILY_DRAFTS = 5
+const MAX_DAILY_DRAFTS = 1  // 하루 1개 키워드만 AI 글 생성
 const YMYL_CATEGORIES = ['의학', '법률', '금융', '생활금융', '건강', '세금']
 
 // ──────────────────────────────────────────

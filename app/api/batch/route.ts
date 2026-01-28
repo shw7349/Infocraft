@@ -6,7 +6,7 @@ import { generateDraft } from '@/lib/claude-content'
 import { checkQuality } from '@/lib/quality-check'
 import { parseBatchFrontmatter } from '@/lib/parse-frontmatter'
 
-const MAX_DAILY_DRAFTS = 5
+const MAX_DAILY_DRAFTS = 1  // 하루 1개 키워드만 AI 글 생성
 const YMYL_CATEGORIES = ['의학', '법률', '금융', '생활금융', '건강', '세금']
 
 // GET — 최근 배치 실행 로그 조회
