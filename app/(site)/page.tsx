@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import ArticleThumbnail from '@/components/site/ArticleThumbnail'
 
 const categories = [
   { name: '생활금융', slug: 'finance', description: '대출, 저축, 투자 등 금융 정보' },
@@ -23,7 +24,11 @@ async function getRecentArticles() {
         publishedAt: true,
       },
     })
-    return articles
+    // Date 객체를 문자열로 변환 (Server Component 직렬화 이슈 방지)
+    return articles.map(article => ({
+      ...article,
+      publishedAt: article.publishedAt?.toISOString() || null,
+    }))
   } catch {
     return []
   }
@@ -72,25 +77,33 @@ export default async function HomePage() {
             {articles.map((article) => (
               <article
                 key={article.id}
-                className="p-4 border border-[var(--border)] rounded-lg hover:shadow-md transition-shadow"
+                className="border border-[var(--border)] rounded-lg hover:shadow-md transition-shadow overflow-hidden"
               >
                 <Link href={`/posts/${article.slug}`}>
-                  <span className="text-xs text-[var(--primary)] font-medium">
-                    {article.category}
-                  </span>
-                  <h3 className="font-bold mt-1 mb-2 hover:text-[var(--primary)]">
-                    {article.title}
-                  </h3>
-                  {article.summary && (
-                    <p className="text-sm text-[var(--muted-foreground)] line-clamp-2">
-                      {article.summary}
-                    </p>
-                  )}
-                  {article.publishedAt && (
-                    <time className="text-xs text-[var(--muted-foreground)] mt-2 block">
-                      {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
-                    </time>
-                  )}
+                  <ArticleThumbnail
+                    title={article.title}
+                    category={article.category}
+                    date={article.publishedAt}
+                    className="w-full"
+                  />
+                  <div className="p-4">
+                    <span className="text-xs text-[var(--primary)] font-medium">
+                      {article.category}
+                    </span>
+                    <h3 className="font-bold mt-1 mb-2 hover:text-[var(--primary)]">
+                      {article.title}
+                    </h3>
+                    {article.summary && (
+                      <p className="text-sm text-[var(--muted-foreground)] line-clamp-2">
+                        {article.summary}
+                      </p>
+                    )}
+                    {article.publishedAt && (
+                      <time className="text-xs text-[var(--muted-foreground)] mt-2 block">
+                        {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
+                      </time>
+                    )}
+                  </div>
                 </Link>
               </article>
             ))}

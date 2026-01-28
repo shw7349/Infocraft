@@ -21,11 +21,12 @@ const FORBIDDEN_PHRASES = [
   '보장', '확실히', '틀림없이',
 ]
 
+// 네이버 블로그 스타일 + 기존 스타일 모두 지원
 const REQUIRED_SECTIONS = [
-  { pattern: /##\s*(핵심|요약|결론)/i, name: '핵심 요약' },
-  { pattern: /##\s*(FAQ|자주\s*묻는|질문)/i, name: 'FAQ 섹션' },
-  { pattern: /##\s*(주의|면책|유의)/i, name: '주의사항/면책' },
-  { pattern: /##\s*(출처|참고|공식)/i, name: '출처/참고 링크' },
+  { pattern: /##\s*.*(핵심|요약|결론)|:::highlight/i, name: '핵심 요약' },
+  { pattern: /##\s*.*(FAQ|자주\s*묻는|질문|❓)/i, name: 'FAQ 섹션' },
+  { pattern: /##\s*.*(주의|면책|유의|⚠️|꼭\s*알아)|:::warning/i, name: '주의사항/면책' },
+  { pattern: /##\s*.*(출처|참고|공식|📌)/i, name: '출처/참고 링크' },
 ]
 
 // 배치 전용: 남용 감지 키워드
@@ -87,6 +88,29 @@ export function checkQuality(
     score -= 10
   }
 
+  // 4-1. 자리표시자 URL 감지 (가짜 링크 사용 금지)
+  const placeholderPatterns = [
+    /\[([^\]]+)\]\(#\)/g,                           // [텍스트](#)
+    /\[([^\]]+)\]\(https?:\/\/example\.com/g,       // example.com
+    /\[([^\]]+)\]\(https?:\/\/www\.example\./g,     // www.example.
+    /\[([^\]]+)\]\(링크\)/g,                         // (링크)
+    /\[([^\]]+)\]\(URL\)/gi,                        // (URL)
+    /\[([^\]]+)\]\(https?:\/\/\[/g,                 // https://[
+    /\[링크\]/g,                                     // [링크] 단독
+    /\(공식\s*사이트\s*URL\)/g,                      // (공식 사이트 URL)
+  ]
+
+  for (const pattern of placeholderPatterns) {
+    const placeholders = content.match(pattern) || []
+    if (placeholders.length > 0) {
+      issues.push({
+        type: 'error',
+        message: `자리표시자 링크 발견: ${placeholders[0]}. 실제 URL로 교체 필요.`,
+      })
+      score -= 20
+    }
+  }
+
   // 5. H2 구조 검사 (최소 3개)
   const h2Count = (content.match(/^##\s+/gm) || []).length
   if (h2Count < 3) {
@@ -98,11 +122,24 @@ export function checkQuality(
   }
 
   // 6. FAQ 개수 검사 (최소 5개)
-  const faqMatches = content.match(/\*\*Q[.:]/gi) || content.match(/Q[.:]\s/gi) || []
-  if (faqMatches.length < 5) {
+  // 패턴: **Q1.**, **Q:**, Q1., Q: 등
+  const faqPatterns = [
+    /\*\*Q\d*[.:]/gi,      // **Q1.** or **Q.**
+    /\*\*Q\d*\*\*[.:]/gi,  // **Q1**. format
+    /^Q\d*[.:]/gim,        // Q1. at line start
+    /###\s*Q\d*[.:]/gi,    // ### Q1.
+  ]
+
+  let faqCount = 0
+  for (const pattern of faqPatterns) {
+    const matches = content.match(pattern) || []
+    faqCount = Math.max(faqCount, matches.length)
+  }
+
+  if (faqCount < 5) {
     issues.push({
       type: 'info',
-      message: `FAQ ${faqMatches.length}개 감지. 최소 5개 이상 권장.`,
+      message: `FAQ ${faqCount}개 감지. 최소 5개 이상 권장.`,
     })
     score -= 5
   }

@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import Breadcrumb from '@/components/site/Breadcrumb'
+import ArticleThumbnail from '@/components/site/ArticleThumbnail'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -28,7 +29,11 @@ async function getArticlesByCategory(category: string) {
         publishedAt: true,
       },
     })
-    return articles
+    // Date 객체를 문자열로 변환 (Server Component 직렬화 이슈 방지)
+    return articles.map(article => ({
+      ...article,
+      publishedAt: article.publishedAt?.toISOString() || null,
+    }))
   } catch {
     return []
   }
@@ -72,26 +77,34 @@ export default async function CategoryPage({ params }: Props) {
       </header>
 
       {articles.length > 0 ? (
-        <div className="grid gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {articles.map((article) => (
             <article
               key={article.id}
-              className="p-4 border border-[var(--border)] rounded-lg hover:shadow-md transition-shadow"
+              className="border border-[var(--border)] rounded-lg hover:shadow-md transition-shadow overflow-hidden"
             >
               <Link href={`/posts/${article.slug}`}>
-                <h2 className="font-bold text-lg mb-2 hover:text-[var(--primary)]">
-                  {article.title}
-                </h2>
-                {article.summary && (
-                  <p className="text-[var(--muted-foreground)] mb-2 line-clamp-2">
-                    {article.summary}
-                  </p>
-                )}
-                {article.publishedAt && (
-                  <time className="text-sm text-[var(--muted-foreground)]">
-                    {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
-                  </time>
-                )}
+                <ArticleThumbnail
+                  title={article.title}
+                  category={slug}
+                  date={article.publishedAt}
+                  className="w-full"
+                />
+                <div className="p-4">
+                  <h2 className="font-bold text-lg mb-2 hover:text-[var(--primary)]">
+                    {article.title}
+                  </h2>
+                  {article.summary && (
+                    <p className="text-[var(--muted-foreground)] mb-2 line-clamp-2">
+                      {article.summary}
+                    </p>
+                  )}
+                  {article.publishedAt && (
+                    <time className="text-sm text-[var(--muted-foreground)]">
+                      {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
+                    </time>
+                  )}
+                </div>
               </Link>
             </article>
           ))}

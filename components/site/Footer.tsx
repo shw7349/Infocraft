@@ -24,11 +24,13 @@ export default function Footer() {
                   소개
                 </Link>
               </li>
+{/*
               <li>
                 <Link href="/contact" className="text-[var(--muted-foreground)] hover:text-[var(--primary)]">
                   문의하기
                 </Link>
               </li>
+*/}
             </ul>
           </div>
 

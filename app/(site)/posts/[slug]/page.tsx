@@ -2,9 +2,11 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { compileMDXContent, extractHeadings, parseFrontmatter } from '@/lib/mdx'
+import { processContent } from '@/lib/content-processor'
 import Breadcrumb from '@/components/site/Breadcrumb'
 import TOC from '@/components/site/TOC'
 import ArticleSchema from '@/components/site/ArticleSchema'
+import ArticleThumbnail from '@/components/site/ArticleThumbnail'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -15,7 +17,14 @@ async function getArticle(slug: string) {
     const article = await prisma.article.findFirst({
       where: { slug, status: 'published' },
     })
-    return article
+    if (!article) return null
+    // Date 객체를 문자열로 변환 (Server Component 직렬화 이슈 방지)
+    return {
+      ...article,
+      publishedAt: article.publishedAt?.toISOString() || null,
+      createdAt: article.createdAt.toISOString(),
+      updatedAt: article.updatedAt.toISOString(),
+    }
   } catch {
     return null
   }
@@ -29,6 +38,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: '페이지를 찾을 수 없습니다' }
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const ogImageUrl = `${siteUrl}/api/og?title=${encodeURIComponent(article.title)}&category=${encodeURIComponent(article.category)}&date=${article.publishedAt?.split('T')[0] || ''}`
+
   return {
     title: article.title,
     description: article.summary || `${article.title}에 대한 상세 정보`,
@@ -36,8 +48,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: article.title,
       description: article.summary || undefined,
       type: 'article',
-      publishedTime: article.publishedAt?.toISOString(),
-      modifiedTime: article.updatedAt.toISOString(),
+      publishedTime: article.publishedAt || undefined,
+      modifiedTime: article.updatedAt,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.summary || undefined,
+      images: [ogImageUrl],
     },
   }
 }
@@ -70,7 +96,14 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   const { frontmatter, content: rawContent } = parseFrontmatter(article.content)
-  const { content } = await compileMDXContent(article.content)
+
+  // 네이버 블로그 스타일 콘텐츠 전처리 (컬러박스, 이미지, 하이라이트)
+  const processedContent = processContent(article.content, {
+    title: article.title,
+    category: article.category,
+  })
+
+  const { content } = await compileMDXContent(processedContent)
   const headings = extractHeadings(rawContent)
   let tags: string[] = []
   try {
@@ -86,8 +119,8 @@ export default async function ArticlePage({ params }: Props) {
       <ArticleSchema
         title={article.title}
         description={article.summary || ''}
-        datePublished={article.publishedAt?.toISOString() || article.createdAt.toISOString()}
-        dateModified={article.updatedAt.toISOString()}
+        datePublished={article.publishedAt || article.createdAt}
+        dateModified={article.updatedAt}
         url={`${siteUrl}/posts/${article.slug}`}
       />
 
@@ -102,6 +135,12 @@ export default async function ArticlePage({ params }: Props) {
         <div className="lg:grid lg:grid-cols-[1fr_200px] lg:gap-8">
           <article className="prose max-w-none">
             <header className="mb-8">
+              <ArticleThumbnail
+                title={article.title}
+                category={article.category}
+                date={article.publishedAt}
+                className="w-full rounded-lg mb-6"
+              />
               <h1 className="text-2xl md:text-3xl font-bold mb-4">
                 {article.title}
               </h1>
@@ -110,7 +149,7 @@ export default async function ArticlePage({ params }: Props) {
                   {categoryNames[article.category] || article.category}
                 </span>
                 {article.publishedAt && (
-                  <time dateTime={article.publishedAt.toISOString()}>
+                  <time dateTime={article.publishedAt}>
                     {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
                   </time>
                 )}
