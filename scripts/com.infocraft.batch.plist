@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.infocraft.batch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/songhyeon-u/IdeaProjects/INFOCRAFT/scripts/run-batch.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>23</integer>
+        <key>Minute</key>
+        <integer>15</integer>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/songhyeon-u/IdeaProjects/INFOCRAFT</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/songhyeon-u/IdeaProjects/INFOCRAFT/logs/launchd-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/songhyeon-u/IdeaProjects/INFOCRAFT/logs/launchd-stderr.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

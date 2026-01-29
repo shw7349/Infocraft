@@ -48,3 +48,6 @@ prisma/dev.db-journal
 # Markdown files (except README.md)
 *.md
 !README.md
+
+# Batch logs
+logs/*.log

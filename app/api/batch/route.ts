@@ -24,11 +24,16 @@ export async function GET() {
   return NextResponse.json(logs)
 }
 
-// POST — 수동 배치 트리거
-export async function POST() {
-  const session = await auth()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+// POST — 수동 배치 트리거 (스케줄러에서도 호출 가능)
+export async function POST(request: Request) {
+  // 스케줄러 내부 호출인 경우 인증 스킵
+  const isSchedulerCall = request.headers.get('x-scheduler-internal') === 'true'
+
+  if (!isSchedulerCall) {
+    const session = await auth()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   const running = await prisma.batchLog.findFirst({
